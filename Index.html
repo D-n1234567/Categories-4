@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>המפלצת רעבה!</title>
+    <style>
+        :root { --m: #a855f7; --m-dark: #7e22ce; --p: #f472b6; --dark-p: #db2777; }
+        * { box-sizing: border-box; touch-action: none; margin: 0; padding: 0; user-select: none; }
+        body { background: #faf5ff; font-family: system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px) rotate(-2deg); }
+            75% { transform: translateX(8px) rotate(2deg); }
+        }
+        .shake-anim { animation: shake 0.4s ease-in-out; }
+
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.2); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+        .pulse-heart { animation: pulse 1.5s infinite ease-in-out; }
+
+        .monster { width: 180px; height: 180px; position: relative; margin: 15px; flex-shrink: 0; }
+        .m-body { 
+            width: 100%; height: 100%; 
+            background: var(--m); 
+            border-radius: 40% 40% 45% 45%; 
+            border: 5px solid var(--m-dark); 
+            position: relative; z-index: 2;
+            background-image: radial-gradient(circle at 20% 20%, #9333ea 10%, transparent 10%),
+                              radial-gradient(circle at 80% 40%, #9333ea 15%, transparent 15%),
+                              radial-gradient(circle at 30% 70%, #9333ea 8%, transparent 8%);
+        }
+        .horn { position: absolute; width: 30px; height: 50px; background: #fbbf24; border: 3px solid #d9a31a; border-radius: 50% 50% 20% 20%; top: -25px; z-index: 1; }
+        .horn-l { left: 30px; transform: rotate(-20deg); }
+        .horn-r { right: 30px; transform: rotate(20deg); }
+        
+        .side-spike { position: absolute; width: 0; height: 0; border-top: 12px solid transparent; border-bottom: 12px solid transparent; border-right: 20px solid var(--m-dark); z-index: 1; }
+        .s-l1 { left: -12px; top: 45px; transform: rotate(15deg); }
+        .s-l2 { left: -15px; top: 85px; transform: rotate(0deg); }
+        .s-r1 { right: -12px; top: 45px; transform: rotate(-15deg) scaleX(-1); }
+        .s-r2 { right: -15px; top: 85px; transform: rotate(0deg) scaleX(-1); }
+
+        .eye { position: absolute; background: white; width: 45px; height: 45px; border-radius: 50%; top: 45px; border: 3px solid #000; overflow: hidden; }
+        .pupil { position: absolute; background: black; width: 22px; height: 22px; border-radius: 50%; top: 10px; left: 10px; }
+        .mouth { position: absolute; width: 75px; height: 15px; background: #2e1065; bottom: 35px; left: 50%; transform: translateX(-50%); border-radius: 20px; transition: 0.2s; overflow: hidden; }
+        .mouth.open { height: 70px; width: 70px; border-radius: 50% 50% 40% 40%; bottom: 15px; }
+        .mouth.smile { height: 40px; border-radius: 10px 10px 50px 50px; bottom: 20px; }
+        
+        .tooth { position: absolute; background: white; width: 14px; height: 14px; border-radius: 0 0 5px 5px; top: 0; }
+        .tooth:nth-child(1) { left: 15px; }
+        .tooth:nth-child(2) { right: 15px; }
+        .tooth.bottom { top: auto; bottom: 0; border-radius: 5px 5px 0 0; }
+        .tooth.bottom:nth-child(3) { left: 25px; }
+        .tooth.bottom:nth-child(4) { right: 25px; }
+
+        .overlay { position: fixed; inset: 0; background: #581c87; color: white; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        .instructions { background: rgba(255,255,255,0.15); padding: 15px 25px; border-radius: 25px; margin: 15px 0; max-width: 90%; font-size: 1.4rem; line-height: 1.4; border: 2px solid rgba(255,255,255,0.3); font-weight: bold; }
+        .main-title { font-size: 3.5rem; font-weight: 900; margin-bottom: 20px; text-shadow: 3px 3px 0 var(--m-dark); color: #fff; }
+        .btn { background: var(--p); color: white; border: none; padding: 15px 45px; font-size: 1.8rem; border-radius: 50px; cursor: pointer; box-shadow: 0 6px 0 var(--dark-p); font-weight: bold; }
+        .btn-gray { background: #64748b; box-shadow: 0 6px 0 #475569; }
+        .btn-green { background: #22c55e; box-shadow: 0 6px 0 #16a34a; }
+        
+        #game-ui { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; }
+        .header { width: 100%; padding: 15px; background: white; border-bottom: 5px solid #f3e8ff; text-align: center; }
+        #ask-text { font-size: 1.6rem; font-weight: bold; color: #7e22ce; margin: 10px 0; min-height: 1.5em; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .item-slot { width: 105px; height: 105px; background: #f3e8ff; border-radius: 25px; display: flex; align-items: center; justify-content: center; border: 3px solid #e9d5ff; }
+        .item { font-size: 3.8rem; cursor: pointer; z-index: 10; }
+        #heart-pop { position: absolute; font-size: 4rem; top: -20px; left: 50%; transform: translateX(-50%); opacity: 0; pointer-events: none; transition: 0.6s ease-out; }
+    </style>
+</head>
+<body>
+
+<div id="start-screen" class="overlay">
+    <h1 class="main-title">המפלצת רעבה!</h1>
+    <div class="monster">
+        <div class="horn horn-l"></div><div class="horn horn-r"></div>
+        <div class="m-body">
+            <div class="eye" style="left:25px"><div class="pupil"></div></div>
+            <div class="eye" style="right:25px"><div class="pupil"></div></div>
+            <div class="mouth" style="height:25px; border-radius:20px; bottom:25px;">
+                <div class="tooth"></div><div class="tooth"></div>
+                <div class="tooth bottom"></div><div class="tooth bottom"></div>
+            </div>
+        </div>
+    </div>
+    <div class="instructions">
+        בואו נעזור למפלצת. <br>
+        היא מאוד רעבה, הביאו לה את הפריט שמתאים לקבוצה שביקשה.
+    </div>
+    <div style="display: flex; align-items: center; gap: 15px; margin-top: 10px;">
+        <button style="background:none; border:none; font-size:4rem; cursor:pointer;" onclick="sayIntro()">🔊</button>
+        <button class="btn" onclick="startGame()">בואו נתחיל</button>
+    </div>
+</div>
+
+<div id="end-screen" class="overlay" style="display:none; background:#581c87;">
+    <h1 style="font-size: 3.5rem; margin-bottom: 15px;">איזה יופי!</h1>
+    <div class="monster">
+        <div class="pulse-heart" style="position: absolute; font-size: 5rem; top: -70px; left: 50%; z-index: 10;">❤️</div>
+        <div class="horn horn-l"></div><div class="horn horn-r"></div>
+        <div class="side-spike s-l1"></div><div class="side-spike s-l2"></div>
+        <div class="side-spike s-r1"></div><div class="side-spike s-r2"></div>
+        <div class="m-body">
+            <div class="eye" style="left:25px"><div class="pupil"></div></div>
+            <div class="eye" style="right:25px"><div class="pupil"></div></div>
+            <div class="mouth smile"></div>
+        </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 40px; width: 250px;">
+        <button class="btn btn-green" onclick="location.reload()">שחק שוב</button>
+        <button class="btn btn-gray" onclick="alert('תודה ששיחקתם!')">סיום</button>
+    </div>
+</div>
+
+<div id="game-ui">
+    <div class="header">
+        <div style="font-weight: bold; color: #581c87;">ניקוד: <span id="score">0</span> / 9</div>
+        <div id="ask-text"></div>
+        <button class="btn" style="padding: 10px 25px; font-size: 1.2rem; margin-top: 5px;" onclick="repeatRequest()">🔊 שמע שוב</button>
+    </div>
+    <div class="monster" id="game-monster" style="margin-top: 40px;">
+        <div id="heart-pop">❤️</div>
+        <div class="horn horn-l"></div><div class="horn horn-r"></div>
+        <div class="side-spike s-l1"></div><div class="side-spike s-l2"></div>
+        <div class="side-spike s-r1"></div><div class="side-spike s-r2"></div>
+        <div class="m-body">
+            <div class="eye" style="left:25px"><div class="pupil"></div></div>
+            <div class="eye" style="right:25px"><div class="pupil"></div></div>
+            <div id="m-mouth" class="mouth">
+                <div class="tooth"></div><div class="tooth"></div>
+                <div class="tooth bottom"></div><div class="tooth bottom"></div>
+            </div>
+        </div>
+    </div>
+    <div id="items-grid" class="grid"></div>
+</div>
+
+<script>
+    const data = [
+        {txt: "הרהיטים", voice: "הָרָהִיטִים", type: "obj", i: ["🪑", "🛋️", "🛏️", "🗄️", "🪞", "🚪", "🛁"]},
+        {txt: "הבגדים", voice: "הַבְּגָדִים", type: "obj", i: ["👕", "👗", "👖", "🧦", "🧥", "👒", "🧣", "👟", "👚", "🧤"]},
+        {txt: "החיות", voice: "הַחַיּוֹת", type: "obj", i: ["🐶", "🐱", "🦁", "🐰", "🐘", "🐵", "🦒", "🐮", "🐷", "🐸", "🐢", "🐧", "🦓"]},
+        {txt: "הפירות", voice: "הַפֵּירוֹת", type: "food", i: ["🍎", "🍌", "🍉", "🍓", "🍍", "🥭", "🍇", "🍒", "🥝", "🍑", "🍐", "🍊"]},
+        {txt: "הירקות", voice: "הַיְּרָקוֹת", type: "food", i: ["🥕", "🥦", "🍅", "🥒", "🌽", "🍆", "🧅", "🥔", "🫑", "🥬"]},
+        {txt: "כלי תחבורה", voice: "כְּלֵי תַּחְבּוּרָה", type: "obj", i: ["🚗", "✈️", "🚲", "🚢", "🚁", "🚂", "🚌", "🚜", "🚤", "🛵", "🚀"]},
+        {txt: "כלי נגינה", voice: "כְּלֵי נְגִינָה", type: "obj", i: ["🎸", "🎹", "🥁", "🎻", "🎺", "🎷", "🪕", "🪘", "🪗"]},
+        {txt: "כלי עבודה", voice: "כְּלֵי עֲבוֹדָה", type: "obj", i: ["🔨", "🔧", "🪚", "🪛", "🪜", "⚒️", "🪓", "🛠️"]},
+        {txt: "ציוד לבית ספר", voice: "צִיּוּד לְבֵית סֵפֶר", type: "obj", i: ["✏️", "📏", "🎒", "📓", "✂️", "📖", "🧮", "🖍️", "🖊️"]},
+        {txt: "הממתקים", voice: "הַמַּמְתָּקִים", type: "food", i: ["🍬", "🍭", "🍫", "🍦", "🧁", "🍮"]},
+        {txt: "כלי מטבח", voice: "כְּלֵי מִטְבָּח", type: "obj", i: ["🍽️", "🥣", "🍴", "🥄", "🍳", "🥘", "🫖", "🧂"]},
+        {txt: "המשחקים", voice: "הַמִּשְׂחָקִים", type: "obj", i: ["🧸", "🪀", "🧩", "🪁", "🤖", "🎮", "🎲", "⚽", "🎳", "🏀"]},
+        {txt: "המאכלים", voice: "הַמַּאֲכָלִים", type: "food_general", i: ["🍕", "🍔", "🥪", "🍝", "🥨", "🧀", "🍱", "🍚", "🥖", "🌮", "🍪", "🥞", "🍩", "🍲"]},
+        {txt: "המשקאות", voice: "הַמַּשְׁקָאוֹת", type: "drink", i: ["🧃", "🥛", "🥤", "☕", "🍵"]}
+    ];
+
+    let score = 0, current = null, playlist = [];
+    const crunchSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2305/2305-preview.mp3');
+    const winSound = new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3');
+
+    function unlockAudio() {
+        const msg = new SpeechSynthesisUtterance("");
+        window.speechSynthesis.speak(msg);
+    }
+
+    function talk(text, isMonster = true) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'he-IL';
+        msg.pitch = isMonster ? 2.0 : 1.1;
+        msg.rate = isMonster ? 1.0 : 0.85; 
+        window.speechSynthesis.speak(msg);
+    }
+
+    function sayIntro() {
+        unlockAudio();
+        talk("בּוֹאוּ נַעֲזוֹר לַמִּפְלֶצֶת. הִיא מְאוֹד רְעֵבָה! הָבִיאוּ לָהּ אֶת הַפָּרִיט שֶׁמַּתְאִים לַקְּבוּצָה שֶׁבִּקְּשָׁה.", false);
+    }
+
+    function startGame() {
+        unlockAudio();
+        score = 0;
+        document.getElementById('score').innerText = score;
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('end-screen').style.display = 'none';
+        document.getElementById('game-ui').style.display = 'flex';
+        playlist = [...data].sort(() => Math.random() - 0.5).slice(0, 9); 
+        nextRound();
+    }
+
+    function repeatRequest() {
+        if(!current) return;
+        talk("תנו לי משהו מקבוצת " + current.voice, true); 
+    }
+
+    function nextRound() {
+        if (score >= 9) {
+            document.getElementById('game-ui').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'flex';
+            winSound.currentTime = 0;
+            winSound.play().catch(() => {});
+            setTimeout(() => talk("תּוֹדָה", true), 500);
+            return;
+        }
+        current = playlist[score];
+        document.getElementById('ask-text').innerText = "תנו לי משהו מקבוצת " + current.txt;
+        setTimeout(repeatRequest, 150);
+        
+        const grid = document.getElementById('items-grid');
+        grid.innerHTML = '';
+        
+        let correctIcon = current.i[Math.floor(Math.random() * current.i.length)];
+        let options = [correctIcon];
+        
+        let distractorPool = [];
+        data.forEach(cat => {
+            if (current.type === 'food_general' || current.type === 'food' || current.type === 'drink') {
+                if (cat.type !== 'food' && cat.type !== 'food_general' && cat.type !== 'drink') {
+                    distractorPool.push(...cat.i);
+                }
+            } else {
+                if (cat.txt !== current.txt) {
+                    distractorPool.push(...cat.i);
+                }
+            }
+        });
+
+        distractorPool.sort(() => Math.random() - 0.5);
+        for(let item of distractorPool) {
+            if (options.length < 4 && !options.includes(item)) {
+                options.push(item);
+            }
+        }
+        
+        options.sort(() => Math.random() - 0.5).forEach(opt => {
+            const slot = document.createElement('div'); slot.className = 'item-slot';
+            const item = document.createElement('div'); item.className = 'item';
+            item.innerText = opt;
+            item.onpointerdown = dragStart;
+            slot.appendChild(item); grid.appendChild(slot);
+        });
+    }
+
+    function dragStart(e) {
+        const el = e.target; el.setPointerCapture(e.pointerId);
+        const rect = el.getBoundingClientRect();
+        const ox = e.clientX - rect.left, oy = e.clientY - rect.top;
+        el.style.position = 'fixed'; el.style.zIndex = '1000'; el.style.transform = 'scale(1.2)';
+        const mEl = document.getElementById('game-monster');
+
+        el.onpointermove = (ev) => {
+            el.style.left = (ev.clientX - ox) + 'px'; el.style.top = (ev.clientY - oy) + 'px';
+            const mRect = mEl.getBoundingClientRect();
+            const overlap = !(ev.clientX < mRect.left || ev.clientX > mRect.right || ev.clientY < mRect.top || ev.clientY > mRect.bottom);
+            document.getElementById('m-mouth').classList.toggle('open', overlap);
+        };
+        
+        el.onpointerup = (ev) => {
+            const mRect = mEl.getBoundingClientRect();
+            const overlap = !(ev.clientX < mRect.left || ev.clientX > mRect.right || ev.clientY < mRect.top || ev.clientY > mRect.bottom);
+            const isCorrect = current.i.includes(el.innerText);
+
+            if (overlap && isCorrect) {
+                score++; document.getElementById('score').innerText = score;
+                crunchSound.currentTime = 0;
+                crunchSound.play().catch(() => {});
+                talk("יאמי", true);
+                document.getElementById('heart-pop').style.opacity = '1';
+                document.getElementById('heart-pop').style.transform = 'translate(-50%, -120px)';
+                setTimeout(() => { 
+                    document.getElementById('heart-pop').style.opacity = '0'; 
+                    document.getElementById('heart-pop').style.transform = 'translate(-50%, 0)'; 
+                    nextRound(); 
+                }, 1000);
+            } else { 
+                if(overlap) {
+                    talk("אוֹי!", true);
+                    mEl.classList.add('shake-anim');
+                    setTimeout(() => mEl.classList.remove('shake-anim'), 400);
+                }
+                el.style.position = 'static'; el.style.transform = 'scale(1)'; 
+            }
+            document.getElementById('m-mouth').classList.remove('open');
+            el.onpointermove = null; el.onpointerup = null;
+        };
+    }
+</script>
+</body>
+</html>
