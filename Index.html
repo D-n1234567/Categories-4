@@ -141,21 +141,29 @@
 </div>
 
 <script>
+    const relatedGroups = {
+        "הפירות": ["הפירות", "הירקות", "הממתקים", "המאכלים"],
+        "הירקות": ["הפירות", "הירקות", "הממתקים", "המאכלים"],
+        "הממתקים": ["הפירות", "הירקות", "הממתקים", "המאכלים"],
+        "המאכלים": ["הפירות", "הירקות", "הממתקים", "המאכלים"],
+        "המשקאות": ["המשקאות", "המאכלים"]
+    };
+
     const data = [
-        {txt: "הרהיטים", voice: "הָרָהִיטִים", type: "obj", i: ["🪑", "🛋️", "🛏️", "🗄️", "🪞", "🚪", "🛁"]},
-        {txt: "הבגדים", voice: "הַבְּגָדִים", type: "obj", i: ["👕", "👗", "👖", "🧦", "🧥", "👒", "🧣", "👟", "👚", "🧤"]},
-        {txt: "החיות", voice: "הַחַיּוֹת", type: "obj", i: ["🐶", "🐱", "🦁", "🐰", "🐘", "🐵", "🦒", "🐮", "🐷", "🐸", "🐢", "🐧", "🦓"]},
-        {txt: "הפירות", voice: "הַפֵּירוֹת", type: "food", i: ["🍎", "🍌", "🍉", "🍓", "🍍", "🥭", "🍇", "🍒", "🥝", "🍑", "🍐", "🍊"]},
-        {txt: "הירקות", voice: "הַיְּרָקוֹת", type: "food", i: ["🥕", "🥦", "🍅", "🥒", "🌽", "🍆", "🧅", "🥔", "🫑", "🥬"]},
-        {txt: "כלי תחבורה", voice: "כְּלֵי תַּחְבּוּרָה", type: "obj", i: ["🚗", "✈️", "🚲", "🚢", "🚁", "🚂", "🚌", "🚜", "🚤", "🛵", "🚀"]},
-        {txt: "כלי נגינה", voice: "כְּלֵי נְגִינָה", type: "obj", i: ["🎸", "🎹", "🥁", "🎻", "🎺", "🎷", "🪕", "🪘", "🪗"]},
-        {txt: "כלי עבודה", voice: "כְּלֵי עֲבוֹדָה", type: "obj", i: ["🔨", "🔧", "🪚", "🪛", "🪜", "⚒️", "🪓", "🛠️"]},
-        {txt: "ציוד לבית ספר", voice: "צִיּוּד לְבֵית סֵפֶר", type: "obj", i: ["✏️", "📏", "🎒", "📓", "✂️", "📖", "🧮", "🖍️", "🖊️"]},
-        {txt: "הממתקים", voice: "הַמַּמְתָּקִים", type: "food", i: ["🍬", "🍭", "🍫", "🍦", "🧁", "🍮"]},
-        {txt: "כלי מטבח", voice: "כְּלֵי מִטְבָּח", type: "obj", i: ["🍽️", "🥣", "🍴", "🥄", "🍳", "🥘", "🫖", "🧂"]},
-        {txt: "המשחקים", voice: "הַמִּשְׂחָקִים", type: "obj", i: ["🧸", "🪀", "🧩", "🪁", "🤖", "🎮", "🎲", "⚽", "🎳", "🏀"]},
-        {txt: "המאכלים", voice: "הַמַּאֲכָלִים", type: "food_general", i: ["🍕", "🍔", "🥪", "🍝", "🥨", "🧀", "🍱", "🍚", "🥖", "🌮", "🍪", "🥞", "🍩", "🍲"]},
-        {txt: "המשקאות", voice: "הַמַּשְׁקָאוֹת", type: "drink", i: ["🧃", "🥛", "🥤", "☕", "🍵"]}
+        {txt: "הרהיטים", voice: "הַ , רהיטים", i: ["🪑", "🛋️", "🛏️", "🗄️", "🪞", "🚪", "🛁", "🖼️", "💡"]},
+        {txt: "הבגדים", voice: "הַ , בגדים", i: ["👕", "👗", "👖", "🧦", "🧥", "👒", "🧣", "👟", "👚", "🧤"]},
+        {txt: "החיות", voice: "הַ , חיות", i: ["🐶", "🐱", "🦁", "🐰", "🐘", "🐵", "🦒", "🐮", "🐷", "🐸", "🐢", "🐧", "🦓"]},
+        {txt: "הפירות", voice: "הַ , פירות", i: ["🍎", "🍌", "🍉", "🍓", "🍍", "🥭", "🍇", "🍒", "🥝", "🍑", "🍐", "🍊"]},
+        {txt: "הירקות", voice: "הַ , ירקות", i: ["🥕", "🥦", "🍅", "🥒", "🌽", "🍆", "🧅", "🥔", "🫑", "🥬"]},
+        {txt: "כלי תחבורה", voice: "כְּלֵי תחבורה", i: ["🚗", "✈️", "🚲", "🚢", "🚁", "🚂", "🚌", "🚜", "🚤", "🛵", "🚀"]},
+        {txt: "כלי נגינה", voice: "כְּלֵי נגינה", i: ["🎸", "🎹", "🥁", "🎻", "🎺", "🎷", "🪕", "🪘", "🪗", "🎼"]},
+        {txt: "כלי עבודה", voice: "כְּלֵי עבודה", i: ["🔨", "🔧", "🪚", "🪛", "🪜", "⚒️", "🪓", "🛠️"]},
+        {txt: "ציוד לבית ספר", voice: "ציוד לבית ספר", i: ["✏️", "📏", "🎒", "📓", "✂️", "📖", "🖍️", "🖊️"]},
+        {txt: "הממתקים", voice: "הַ , ממתקים", i: ["🍬", "🍭", "🍫", "🍦", "🧁", "🍮"]},
+        {txt: "כלי מטבח", voice: "כְּלֵי מטבח", i: ["🍽️", "🥣", "🍴", "🥄", "🍳", "🥘", "🫖", "🧂"]},
+        {txt: "המשחקים", voice: "הַ , משחקים", i: ["🧸", "🪀", "🧩", "🪁", "🤖", "🎮", "🎲", "⚽", "🎳", "🏀"]},
+        {txt: "המאכלים", voice: "הַ , מאכלים", i: ["🍕", "🍔", "🥪", "🍝", "🥨", "🧀", "🍚", "🥖", "🌮", "🍪", "🥞", "🍩", "🍲"]},
+        {txt: "המשקאות", voice: "הַ , משקאות", i: ["💧", "🧃", "🥛", "🥤", "☕", "🍵", "🧊"]}
     ];
 
     let score = 0, current = null, playlist = [];
@@ -170,15 +178,18 @@
     function talk(text, isMonster = true) {
         window.speechSynthesis.cancel();
         const msg = new SpeechSynthesisUtterance(text);
+        const voices = window.speechSynthesis.getVoices();
+        const hebrewVoice = voices.find(v => v.lang.includes('he'));
+        if (hebrewVoice) msg.voice = hebrewVoice;
         msg.lang = 'he-IL';
-        msg.pitch = isMonster ? 2.0 : 1.1;
-        msg.rate = isMonster ? 1.0 : 0.85; 
+        msg.pitch = isMonster ? 1.4 : 1.1;
+        msg.rate = 0.95;
         window.speechSynthesis.speak(msg);
     }
 
     function sayIntro() {
         unlockAudio();
-        talk("בּוֹאוּ נַעֲזוֹר לַמִּפְלֶצֶת. הִיא מְאוֹד רְעֵבָה! הָבִיאוּ לָהּ אֶת הַפָּרִיט שֶׁמַּתְאִים לַקְּבוּצָה שֶׁבִּקְּשָׁה.", false);
+        talk("המפלצת רעבה. בואו נעזור לה! בכל פעם גררו לַה-פֶּה של המפלצת את ה פַּה-רִיט מהקבוצה שהיא מבקשת.", false);
     }
 
     function startGame() {
@@ -201,45 +212,35 @@
         if (score >= 9) {
             document.getElementById('game-ui').style.display = 'none';
             document.getElementById('end-screen').style.display = 'flex';
-            winSound.currentTime = 0;
             winSound.play().catch(() => {});
-            setTimeout(() => talk("תּוֹדָה", true), 500);
+            talk("איזה יופי! אני שבעה!");
             return;
         }
         current = playlist[score];
         document.getElementById('ask-text').innerText = "תנו לי משהו מקבוצת " + current.txt;
-        setTimeout(repeatRequest, 150);
+        setTimeout(repeatRequest, 300);
         
         const grid = document.getElementById('items-grid');
         grid.innerHTML = '';
         
         let correctIcon = current.i[Math.floor(Math.random() * current.i.length)];
-        let options = [correctIcon];
+        let options = [{icon: correctIcon, cat: current.txt}];
         
-        let distractorPool = [];
-        data.forEach(cat => {
-            if (current.type === 'food_general' || current.type === 'food' || current.type === 'drink') {
-                if (cat.type !== 'food' && cat.type !== 'food_general' && cat.type !== 'drink') {
-                    distractorPool.push(...cat.i);
-                }
-            } else {
-                if (cat.txt !== current.txt) {
-                    distractorPool.push(...cat.i);
-                }
-            }
-        });
+        let forbiddenCats = relatedGroups[current.txt] || [current.txt];
+        let availableCats = data.filter(c => !forbiddenCats.includes(c.txt));
 
-        distractorPool.sort(() => Math.random() - 0.5);
-        for(let item of distractorPool) {
-            if (options.length < 4 && !options.includes(item)) {
-                options.push(item);
-            }
+        while(options.length < 4) {
+            let rCatIndex = Math.floor(Math.random() * availableCats.length);
+            let rCat = availableCats[rCatIndex];
+            let rIcon = rCat.i[Math.floor(Math.random() * rCat.i.length)];
+            options.push({icon: rIcon, cat: rCat.txt});
+            availableCats.splice(rCatIndex, 1);
         }
         
         options.sort(() => Math.random() - 0.5).forEach(opt => {
             const slot = document.createElement('div'); slot.className = 'item-slot';
             const item = document.createElement('div'); item.className = 'item';
-            item.innerText = opt;
+            item.innerText = opt.icon;
             item.onpointerdown = dragStart;
             slot.appendChild(item); grid.appendChild(slot);
         });
@@ -266,9 +267,8 @@
 
             if (overlap && isCorrect) {
                 score++; document.getElementById('score').innerText = score;
-                crunchSound.currentTime = 0;
-                crunchSound.play().catch(() => {});
-                talk("יאמי", true);
+                crunchSound.currentTime = 0; crunchSound.play().catch(() => {});
+                talk("יאמי!", true);
                 document.getElementById('heart-pop').style.opacity = '1';
                 document.getElementById('heart-pop').style.transform = 'translate(-50%, -120px)';
                 setTimeout(() => { 
@@ -278,7 +278,7 @@
                 }, 1000);
             } else { 
                 if(overlap) {
-                    talk("אוֹי!", true);
+                    talk("אוי!", true);
                     mEl.classList.add('shake-anim');
                     setTimeout(() => mEl.classList.remove('shake-anim'), 400);
                 }
@@ -288,6 +288,7 @@
             el.onpointermove = null; el.onpointerup = null;
         };
     }
+    window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
 </script>
 </body>
 </html>
